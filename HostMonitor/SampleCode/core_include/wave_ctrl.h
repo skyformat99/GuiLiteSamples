@@ -9,10 +9,10 @@ typedef enum
 
 typedef enum
 {
-	GAIN_025,
-	GAIN_050,
-	GAIN_100,
-	GAIN_200
+	ZOOM_025,
+	ZOOM_050,
+	ZOOM_100,
+	ZOOM_200
 }E_WAVE_GAIN;
 
 class c_wave_buffer;
@@ -24,12 +24,11 @@ public:
 	virtual void on_init_children();
 	virtual void on_paint();
 
-	void set_wave_name(unsigned short wave_name_id){ m_wave_name = wave_name_id;}
-	unsigned short get_wave_name(){return m_wave_name;}
-	void set_wave_unit(unsigned short wave_unit_id){ m_wave_unit = wave_unit_id;}
+	void set_wave_name(char* wave_name){ m_wave_name = wave_name;}
+	void set_wave_unit(char* wave_unit){ m_wave_unit = wave_unit;}
 
-	void set_wave_name_font_type(const GUI_FONT* wave_name_font_type){ m_wave_name_font_type = wave_name_font_type;}
-	void set_wave_unit_font_type(const GUI_FONT* wave_unit_font_type){ m_wave_unit_font_type = wave_unit_font_type;}
+	void set_wave_name_font_type(const FONT_INFO* wave_name_font_type){ m_wave_name_font_type = wave_name_font_type;}
+	void set_wave_unit_font_type(const FONT_INFO* wave_unit_font_type){ m_wave_unit_font_type = wave_unit_font_type;}
 
 	void set_wave_name_color(unsigned int wave_name_color){ m_wave_name_color = wave_name_color;}
 	void set_wave_unit_color(unsigned int wave_unit_color){ m_wave_unit_color = wave_unit_color;}
@@ -48,14 +47,14 @@ public:
 	
 protected:
 	void draw_smooth_vline(int y_min, int y_max, int mid, unsigned int rgb);
-	void erase_oldest_vline();
-	void save_foreground();
+	void restore_background();
+	void save_background();
 
-	unsigned short m_wave_name;
-	unsigned short m_wave_unit;
+	char* m_wave_name;
+	char* m_wave_unit;
 
-	const GUI_FONT* m_wave_name_font_type;
-	const GUI_FONT* m_wave_unit_font_type;
+	const FONT_INFO* m_wave_name_font_type;
+	const FONT_INFO* m_wave_unit_font_type;
 
 	unsigned int m_wave_name_color;
 	unsigned int m_wave_unit_color;
@@ -75,7 +74,7 @@ protected:
 	
 private:
 	c_wave_buffer*	m_wave;
-	void*			m_bg_fb;			//background frame buffer, could be used to draw scale line.
+	unsigned int*	m_bg_fb;			//background frame buffer, could be used to draw scale line.
 	int 			m_wave_cursor;
 	int 			m_wave_speed;		//pixels per refresh
 	int				m_wave_sample_rate;

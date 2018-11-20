@@ -1,6 +1,7 @@
 #include "../core_include/api.h"
 #include "../core_include/msg.h"
 #include "../core_include/audio.h"
+#include "../core_include/resource.h"
 #include "../include/msg_id.h"
 #include "../core_include/cmd_target.h"
 #include "../source/manager/wave_manager.h"
@@ -225,14 +226,8 @@ void c_demo_module::unpack_ecg()
 	static int sample_index;
 
 	c_value_manager::get_instance()->save_value(VALUE_HR, 60 + (rand() % 50));
-	c_value_manager::get_instance()->save_value(VALUE_PVCs, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_II, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_I, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_III, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_AVF, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_AVR, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_AVL, 0);
-	c_value_manager::get_instance()->save_value(VALUE_ST_V1, 0);
+	c_value_manager::get_instance()->save_value(VALUE_PVCs, 3);
+	c_value_manager::get_instance()->save_value(VALUE_ST_II, 2);
 
 	short temp1,temp2;
 	short demo_iii,demo_avr,demo_avl,demo_avf;
@@ -258,13 +253,13 @@ void c_demo_module::unpack_ecg()
 			demo_avr = 0x80 - (demo_avr - 0x80);
 		}
 
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG1, s_ecg_ii_data[sample_index]); //I
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG2, s_ecg_i_data[sample_index]);  //II
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG3, demo_iii);					//III
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG4, demo_avr);					//AVR
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG5, demo_avl);					//AVL
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG6, demo_avf);					//AVR
-		c_wave_manage::get_instance()->save_curve_data(WAVE_ECG7, s_ecg_v_data[sample_index]);  //V
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG1, s_ecg_ii_data[sample_index]); //I
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG2, s_ecg_i_data[sample_index]);  //II
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG3, demo_iii);					//III
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG4, demo_avr);					//AVR
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG5, demo_avl);					//AVL
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG6, demo_avf);					//AVR
+		c_wave_manage::get_instance()->save_wave_data(WAVE_ECG7, s_ecg_v_data[sample_index]);  //V
 		
 		if (s_ecg_ii_data[sample_index] == 0xA2)
 		{
@@ -291,7 +286,7 @@ void c_demo_module::unpack_spo2()
 	step_index %= sizeof(m_spo2_write_len_array);
 	for (int i = 0; i < cnt_per_step; i++ )
 	{
-		c_wave_manage::get_instance()->save_curve_data(WAVE_SPO2, s_spo2_data[sample_index]);
+		c_wave_manage::get_instance()->save_wave_data(WAVE_SPO2, s_spo2_data[sample_index]);
 		sample_index++;
 		if (sample_index >= sizeof(s_spo2_data))
 		{
@@ -312,7 +307,7 @@ void c_demo_module::unpack_resp()
 
 	for (int i = 0; i < cnt_per_step; i++ )
 	{
-		c_wave_manage::get_instance()->save_curve_data(WAVE_RESP,s_resp_data[sample_index]);
+		c_wave_manage::get_instance()->save_wave_data(WAVE_RESP,s_resp_data[sample_index]);
 		sample_index++;
 		if (sample_index >= sizeof(s_resp_data))
 		{

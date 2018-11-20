@@ -1,16 +1,19 @@
-#For Android(Android studio)
+# For Android(Android studio)
+build
 *.iml
 .gradle
 .DS_Store
-/EcgMonitor/BuildAndroid/local.properties
-/EcgMonitor/BuildAndroid/.idea/workspace.xml
-/EcgMonitor/BuildAndroid/.idea/libraries
-/EcgMonitor/BuildAndroid/build
-/EcgMonitor/BuildAndroid/captures
-/EcgMonitor/BuildAndroid/libs
-/EcgMonitor/BuildAndroid/obj
+/HostMonitor/BuildAndroid/local.properties
+/HostMonitor/BuildAndroid/.idea/workspace.xml
+/HostMonitor/BuildAndroid/.idea/libraries
+/HostMonitor/BuildAndroid/.idea/caches
+/HostMonitor/BuildAndroid/.idea/codeStyles
+/HostMonitor/BuildAndroid/build
+/HostMonitor/BuildAndroid/captures
+/HostMonitor/BuildAndroid/libs
+/HostMonitor/BuildAndroid/obj
 
-#For Windows(Visual stduio)
+# For Windows(Visual stduio)
 .vs
 ipch
 *.suo
@@ -26,14 +29,27 @@ Generated Files
 AppPackages
 BundleArtifacts
 
-#For Linux(GCC)
+# For Linux(GCC)
 *.d
 *.o
 *.map
-#*.mk  android jni need it.
-#For cmake
+*.mk  android jni need it.
+
+# For cmake
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
 Makefile
-EcgMonitor\sample\source\libsample.a
+
+# For Xcode
+.DS_store
+*.swp
+*.lock
+profile
+xcuserdata
+
+# For output
+/HostMonitor/BuildMacCmd/sample_native
+/HostMonitor/BuildLinux/sample_native
+/HostMonitor/SampleCode/libsample.a
+/HostMonitor/BuildMFC/HostMonitor/BuildMFC.aps

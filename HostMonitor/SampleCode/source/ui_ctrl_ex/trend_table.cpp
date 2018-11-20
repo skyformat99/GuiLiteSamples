@@ -3,22 +3,21 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../core_include/surface.h"
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 #include "../core_include/word.h"
-#include "../gui_include/font.h"
+#include "../gui_include/my_resource.h"
 #include "../include/ctrl_id.h"
-#include "../source/resource/font/strings.h"
 #include "../gui_include/table.h"
 #include <stdio.h>
 #include "trend_table.h"
 
 void c_trend_table::on_init_children(void)
 {
-	m_font_color = GLT_RGB(255, 255, 255);
-	m_bg_color = GLT_RGB(80, 87, 104);
+	m_font_color = GL_RGB(255, 255, 255);
+	m_bg_color = GL_RGB(80, 87, 104);
 
 	m_align_type = ALIGN_LEFT | ALIGN_VCENTER;
-	m_font_type = FONT_ENG_SMB_AA();
+	m_font_type = c_my_resource::get_font(FONT_ENG_SMB);
 
 	set_col_num(9);
 	set_row_num(9);

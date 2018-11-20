@@ -2,11 +2,10 @@
 #include "../core_include/rect.h"
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 #include "../core_include/word.h"
 #include "../gui_include/button.h"
-#include "../gui_include/font.h"
-#include "../source/resource/font/strings.h"
+#include "../gui_include/my_resource.h"
 #include <stdio.h>
 #include "time_bar.h"
 
@@ -33,14 +32,14 @@ GLT_END_MESSAGE_MAP()
 void c_time_bar::on_init_children()
 {
 	set_time(get_time_in_second());
-	m_bg_color = GLT_RGB(49, 49, 49);
+	m_bg_color = GL_RGB(49, 49, 49);
 
 	c_rect rect;
 	get_screen_rect(rect);
-	m_fast_backward.connect(this, ID_FAST_BACKWARD_BTN, STR_TIME_SCALE_BAR_FAST_BACKWARD, 0, 0, BUTTON_LENGTH, rect.Height());
-	m_backward.connect(this, ID_BACKWARD_BTN, STR_TIME_SCALE_BAR_BACKWARD, (BUTTON_LENGTH + 1), 0, BUTTON_LENGTH, rect.Height());
-	m_forward.connect(this, ID_FORWARD_BTN, STR_TIME_SCALE_BAR_FORWARD, (rect.Width() - 2 * BUTTON_LENGTH - 6), 0, BUTTON_LENGTH, rect.Height());
-	m_fast_forward.connect(this, ID_FAST_FORWARD_BTN, STR_TIME_SCALE_BAR_FAST_FORWARD, (rect.Width() - BUTTON_LENGTH - 5), 0, BUTTON_LENGTH, rect.Height());
+	m_fast_backward.connect(this, ID_FAST_BACKWARD_BTN, "<<", 0, 0, BUTTON_LENGTH, rect.Height());
+	m_backward.connect(this, ID_BACKWARD_BTN, "<", (BUTTON_LENGTH + 1), 0, BUTTON_LENGTH, rect.Height());
+	m_forward.connect(this, ID_FORWARD_BTN, ">", (rect.Width() - 2 * BUTTON_LENGTH - 6), 0, BUTTON_LENGTH, rect.Height());
+	m_fast_forward.connect(this, ID_FAST_FORWARD_BTN, ">>", (rect.Width() - BUTTON_LENGTH - 5), 0, BUTTON_LENGTH, rect.Height());
 }
 
 void c_time_bar::on_paint(void)
@@ -54,11 +53,11 @@ void c_time_bar::on_paint(void)
 
 void c_time_bar::set_time(long time)
 {
-	set_scale_bar_atrrs((time - ((TIME_MARK_CNT - 1) * 60)), time, GLT_RGB(255, 255, 255), FONT_ENG_SB());
+	set_scale_bar_atrrs((time - ((TIME_MARK_CNT - 1) * 60)), time, GL_RGB(255, 255, 255), c_my_resource::get_font(FONT_ENG_SB));
 	draw_mark();
 }
 
-int c_time_bar::set_scale_bar_atrrs(long start_time, long end_time, unsigned int color, const GUI_FONT* font)
+int c_time_bar::set_scale_bar_atrrs(long start_time, long end_time, unsigned int color, const FONT_INFO* font)
 {
 	if ( !font ||  end_time <= start_time)
 	{
@@ -118,20 +117,20 @@ void c_time_bar::draw_scale()
 	//draw border
 	draw_hline( rect.m_left + MARGIN_LEFT, rect.m_right - MARGIN_RIGHT, rect.m_top, m_scale_color );
 	draw_hline( rect.m_left + MARGIN_LEFT, rect.m_right - MARGIN_RIGHT, rect.m_bottom, m_scale_color );
-	draw_vline( x_pos[0], rect.m_top, rect.m_top + NORMAL_SCALE_HEIGHT, GLT_RGB(255,255,255) );
-	draw_vline( x_pos[0] + 1, rect.m_bottom - NORMAL_SCALE_HEIGHT, rect.m_bottom, GLT_RGB(255,255,255) );
+	draw_vline( x_pos[0], rect.m_top, rect.m_top + NORMAL_SCALE_HEIGHT, GL_RGB(255,255,255) );
+	draw_vline( x_pos[0] + 1, rect.m_bottom - NORMAL_SCALE_HEIGHT, rect.m_bottom, GL_RGB(255,255,255) );
 
 	float sub_scale_line_len = (float)((x_pos[1] - x_pos[0]) / 4.00);
 	for ( i = 1; i < TIME_MARK_CNT; i++ )
 	{
 		for ( j = 1; j < 4; j++ )
 		{//sub scale line
-			draw_vline( (int)(x_pos[i-1] + sub_scale_line_len * j), rect.m_top + 1, rect.m_top + MINI_SCALE_HEIGHT, GLT_RGB(117,117,117) );
-			draw_vline( (int)(x_pos[i-1] + sub_scale_line_len * j), rect.m_bottom - MINI_SCALE_HEIGHT - 1 , rect.m_bottom, GLT_RGB(117,117,117) );
+			draw_vline( (int)(x_pos[i-1] + sub_scale_line_len * j), rect.m_top + 1, rect.m_top + MINI_SCALE_HEIGHT, GL_RGB(117,117,117) );
+			draw_vline( (int)(x_pos[i-1] + sub_scale_line_len * j), rect.m_bottom - MINI_SCALE_HEIGHT - 1 , rect.m_bottom, GL_RGB(117,117,117) );
 		}
 		//scale line
-		draw_vline( x_pos[i], rect.m_top, rect.m_top + NORMAL_SCALE_HEIGHT, GLT_RGB(255,255,255) );
-		draw_vline( x_pos[i] + 1, rect.m_bottom - NORMAL_SCALE_HEIGHT, rect.m_bottom, GLT_RGB(255,255,255) );
+		draw_vline( x_pos[i], rect.m_top, rect.m_top + NORMAL_SCALE_HEIGHT, GL_RGB(255,255,255) );
+		draw_vline( x_pos[i] + 1, rect.m_bottom - NORMAL_SCALE_HEIGHT, rect.m_bottom, GL_RGB(255,255,255) );
 	}
 }
 

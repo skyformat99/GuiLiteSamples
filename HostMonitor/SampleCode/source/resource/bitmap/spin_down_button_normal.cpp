@@ -1,11 +1,11 @@
 #include "stdlib.h"
 
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 
 #ifndef GUI_CONST_STORAGE
   #define GUI_CONST_STORAGE const
 #endif
-extern const GUI_BITMAP bmspin_down_button_normal;
+extern const BITMAP_INFO bmspin_down_button_normal;
 
 
 static GUI_CONST_STORAGE unsigned short acspin_down_button_normal[] = {
@@ -131,10 +131,9 @@ static GUI_CONST_STORAGE unsigned short acspin_down_button_normal[] = {
         0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
-GUI_CONST_STORAGE GUI_BITMAP bmspin_down_button_normal = {
+GUI_CONST_STORAGE BITMAP_INFO bmspin_down_button_normal = {
   55, /* XSize */
   60, /* YSize */
-  110, /* BytesPerLine */
   16, /* BitsPerPixel */
   (unsigned char *)acspin_down_button_normal,  /* Pointer to picture data */
 };

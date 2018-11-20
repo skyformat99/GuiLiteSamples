@@ -3,10 +3,9 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../gui_include/table.h"
-#include "../gui_include/font.h"
+#include "../gui_include/my_resource.h"
 
 #include "../include/ctrl_id.h"
-#include "../source/resource/font/strings.h"
 #include "../source/ui_ctrl_ex/value_view.h"
 
 #include "nibp_list_view.h"
@@ -23,15 +22,15 @@ void c_nibplist_view::on_init_children(void)
 		return;
 	}
 
-	p_table->set_font_color(GLT_RGB(255,255,255));
-	p_table->set_bg_color(GLT_RGB(0,0,0));
+	p_table->set_font_color(GL_RGB(255,255,255));
+	p_table->set_bg_color(GL_RGB(0,0,0));
 
 	int total_height = rect.Height();
 	int total_width = rect.Width()-4;
 	m_table_colnum = 3;
 	int col_width = total_width/(m_table_colnum+3);
 
-	p_table->set_font_type(FONT_ENG_SMB_AA());
+	p_table->set_font_type(c_my_resource::get_font(FONT_ENG_SMB));
 	int row_height = 26;
 
 	m_table_rownum = total_height / row_height;

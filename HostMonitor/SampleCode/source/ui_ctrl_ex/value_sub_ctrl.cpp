@@ -3,9 +3,8 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../core_include/surface.h"
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 #include "../core_include/word.h"
-#include "../gui_include/shape_resource.h"
 #include "../source/manager/value_manager.h"
 
 #include "value_ctrl.h"
@@ -18,11 +17,11 @@ void c_value_sub_ctrl::on_paint(void)
 	fill_rect(rect.m_left,rect.m_top,rect.m_right,rect.m_bottom,m_bg_color);
 
 	//show name
-	c_word::draw_string(m_surface, m_z_order, m_name_id, rect.m_left + 1, rect.m_top, m_name_font_type, m_name_color, m_bg_color);
+	c_word::draw_string(m_surface, m_z_order, m_name_str, rect.m_left + 1, rect.m_top, m_name_font_type, m_name_color, m_bg_color);
 	
 	//show value	
 	m_value_rect.m_left = rect.m_left + 32;
-	m_value_rect.m_top = rect.m_top + (rect.Height() - c_word::get_font_ysize(m_value_font_type)) / 2;
+	m_value_rect.m_top = rect.m_top + (rect.Height() - (m_value_font_type->height)) / 2;
 	if (m_value_rect.m_top < rect.m_top)
 	{
 		m_value_rect.m_top = rect.m_top + 2;
@@ -37,7 +36,7 @@ void c_value_sub_ctrl::on_paint(void)
 	{
 		m_value_rect.m_right = rect.m_right - 2;
 	}
-	m_value_rect.m_bottom = m_value_rect.m_top + c_word::get_font_ysize(m_value_font_type);
+	m_value_rect.m_bottom = m_value_rect.m_top + (m_value_font_type->height);
 	if (m_value_rect.m_bottom > rect.m_bottom)
 	{
 		m_value_rect.m_bottom = rect.m_bottom - 2;

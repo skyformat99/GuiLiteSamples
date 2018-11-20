@@ -7,18 +7,23 @@
 #define TRUE 	1
 #define FALSE 	0
 
-void do_assert(const char* file, int line);
+void register_debug_function(void(*my_assert)(const char* file, int line), void(*my_log_out)(const char* log));
+void _assert(const char* file, int line);
 #define ASSERT(condition)	\
 	do{                     \
-	if(!(condition))do_assert(__FILE__, __LINE__);\
+	if(!(condition))_assert(__FILE__, __LINE__);\
 	}while(0)
-
 void log_out(const char* log);
 
-unsigned int GLT_RGB(unsigned char r, unsigned char g, unsigned char b);
-unsigned char GLT_RGB_R(unsigned int color);
-unsigned char GLT_RGB_G(unsigned int color);
-unsigned char GLT_RGB_B(unsigned int color);
+#define GL_ARGB(a, r, g, b) ((((unsigned int)(a)) << 24) | (((unsigned int)(r)) << 16) | (((unsigned int)(g)) << 8) | ((unsigned int)(b)))
+#define GL_ARGB_A(rgb) ((((unsigned int)(rgb)) >> 24) & 0xFF)
+
+#define GL_RGB(r, g, b) ((0xFF << 24) | (((unsigned int)(r)) << 16) | (((unsigned int)(g)) << 8) | ((unsigned int)(b)))
+#define GL_RGB_R(rgb) ((((unsigned int)(rgb)) >> 16) & 0xFF)
+#define GL_RGB_G(rgb) ((((unsigned int)(rgb)) >> 8) & 0xFF)
+#define GL_RGB_B(rgb) (((unsigned int)(rgb)) & 0xFF)
+#define GL_RGB_32_to_16(rgb) (((((unsigned int)(rgb)) & 0xFF) >> 3) | ((((unsigned int)(rgb)) & 0xFC00) >> 5) | ((((unsigned int)(rgb)) & 0xF80000) >> 8))
+#define GL_RGB_16_to_32(rgb) (((((unsigned int)(rgb)) & 0x1F) << 3) | ((((unsigned int)(rgb)) & 0x7E0) << 5) | ((((unsigned int)(rgb)) & 0xF800) << 8))
 
 typedef struct _T_TIME
 {

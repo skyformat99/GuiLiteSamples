@@ -3,16 +3,13 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../core_include/surface.h"
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 #include "../core_include/word.h"
 #include "../gui_include/label.h"
-#include "../gui_include/font.h"
-#include "../gui_include/shape_resource.h"
 
 #include "../include/ctrl_id.h"
 
 #include "../source/ui_ctrl_ex/value_view.h"
-#include "../source/resource/font/strings.h"
 #include "../source/ui_ctrl_ex/value_ctrl.h"
 #include "../source/manager/value_manager.h"
 #include "../source/manager/value_ctrl_manager.h"
@@ -32,11 +29,8 @@ void c_nibp_value_view::on_init_children(void)
 		return;
 	}
 
-	p_sys_value->set_value_font_type(FONT_ENG_LLB());
-	p_mean_value->set_value_font_type(FONT_ENG_MB_AA());
-	p_dia_value->set_value_font_type(FONT_ENG_LLB());
-	p_name->set_font_type(FONT_ENG_SMB_AA());
-	p_name->set_font_color(GLT_RGB(255, 255, 255));
+	p_name->set_font_type(c_my_resource::get_font(FONT_ENG_SMB));
+	p_name->set_font_color(GL_RGB(255, 255, 255));
 
 	c_value_ctrl_manage::get_instance()->config_param_ctrl_att(VALUE_NIBP_SYS, p_sys_value);
 	c_value_ctrl_manage::get_instance()->config_param_ctrl_att(VALUE_NIBP_DIA, p_dia_value);

@@ -32,8 +32,8 @@ typedef struct
 	unsigned int dwParam2;
 }OUTMSGINFO;
 
-extern "C" void* get_frame_buffer(int display_id, int* width, int* height);
-extern "C" int send_hid_msg(void* buf, int len, int display_id);
+extern void* getUiOfHostMonitor(int display_id, int* width, int* height);
+extern int sendTouch2HostMonitor(void* buf, int len, int display_id);
 
 SubScreen::SubScreen()
 {
@@ -48,9 +48,10 @@ void SubScreen::initScreen()
 	m_screen_sub->PointerMoved += ref new PointerEventHandler(this, &SubScreen::OnPointerMoved);
 }
 
-void SubScreen::set_attr(int index)
+void SubScreen::set_attr(int index, int color_bytes)
 {
 	m_index = index;
+	m_color_bytes = color_bytes;
 }
 
 byte* SubScreen::get_pixel_data(IBuffer^ pixelBuffer, unsigned int *length)
@@ -73,7 +74,7 @@ void SubScreen::update_screen()
 {
 	if (nullptr == m_fb_bitmap)
 	{
-		unsigned short* raw_data = (unsigned short*)get_frame_buffer(m_index, &m_fb_width, &m_fb_height);
+		unsigned short* raw_data = (unsigned short*)getUiOfHostMonitor(m_index, &m_fb_width, &m_fb_height);
 		if (raw_data)
 		{
 			m_fb_bitmap = ref new Windows::UI::Xaml::Media::Imaging::WriteableBitmap(m_fb_width, m_fb_height);
@@ -85,20 +86,37 @@ void SubScreen::update_screen()
 	unsigned int length;
 	byte* sourcePixels = get_pixel_data(m_fb_bitmap->PixelBuffer, &length);
 
-	unsigned short* raw_data = (unsigned short*)get_frame_buffer(m_index, NULL, NULL);
+	void* raw_data = getUiOfHostMonitor(m_index, NULL, NULL);
 	if (!raw_data)
 	{
 		return;
 	}
 
-	for (int i = 0; i < length; i += 4)
+	if (m_color_bytes == 4)
 	{
-		unsigned short rgb = *raw_data++;
+		unsigned int* p_data = (unsigned int*)raw_data;
+		for (int i = 0; i < length; i += 4)
+		{
+			unsigned int rgb = *p_data++;
 
-		sourcePixels[i + 3] = 0xff;//transport
-		sourcePixels[i] = ((rgb << 3) & 0xF8);
-		sourcePixels[i + 1] = ((rgb >> 3) & 0xFC);
-		sourcePixels[i + 2] = ((rgb >> 8) & 0xF8);
+			sourcePixels[i + 3] = 0xff;//transport
+			sourcePixels[i] = (rgb & 0xFF);
+			sourcePixels[i + 1] = ((rgb >> 8) & 0xFF);
+			sourcePixels[i + 2] = ((rgb >> 16) & 0xFF);
+		}
+	}
+	else//16 bits
+	{
+		unsigned short* p_data = (unsigned short*)raw_data;
+		for (int i = 0; i < length; i += 4)
+		{
+			unsigned short rgb = *p_data++;
+
+			sourcePixels[i + 3] = 0xff;//transport
+			sourcePixels[i] = ((rgb << 3) & 0xF8);
+			sourcePixels[i + 1] = ((rgb >> 3) & 0xFC);
+			sourcePixels[i + 2] = ((rgb >> 8) & 0xF8);
+		}
 	}
 	m_fb_bitmap->Invalidate();
 }
@@ -113,7 +131,7 @@ void SubScreen::OnPointerPressed(Platform::Object^ sender, Windows::UI::Xaml::In
 	msg.dwMsgId = 0x4700;
 	msg.dwParam1 = native_x;
 	msg.dwParam2 = native_y;
-	send_hid_msg(&msg, sizeof(msg), m_index);
+	sendTouch2HostMonitor(&msg, sizeof(msg), m_index);
 
 	m_is_dragging = true;
 }
@@ -128,7 +146,7 @@ void SubScreen::OnPointerRelease(Platform::Object^ sender, Windows::UI::Xaml::In
 	msg.dwMsgId = 0x4600;
 	msg.dwParam1 = native_x;
 	msg.dwParam2 = native_y;
-	send_hid_msg(&msg, sizeof(msg), m_index);
+	sendTouch2HostMonitor(&msg, sizeof(msg), m_index);
 
 	m_is_dragging = false;
 }

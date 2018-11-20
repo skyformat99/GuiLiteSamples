@@ -1,48 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/shm.h>
+#include <unistd.h>
+#include <execinfo.h>
+#include <sys/mman.h>
+#include <linux/fb.h>
+#include <errno.h>
 
-extern int run(void** main_fbs, int main_cnt, void** sub_fbs, int sub_cnt);
+extern int startHostMonitor(void** main_fbs, int main_cnt, int main_width, int main_height, void** sub_fbs, int sub_cnt, int sub_width, int sub_height, int color_bytes);
 extern void init_std_io(int display_cnt);
 
-static void init_dump();
-static void* make_fb_shared_by_display_app(int shared_id);
+static void* get_embeded_fb_in_display_app(int shared_id);
+static void* get_dev_fb(char* path, int &width, int &height, int &color_bytes);
+
+typedef int(*SYNC_DATA)(int hr, int spo2, int rr, int nibp_sys, int nibp_dia, int nibp_mean);
+extern SYNC_DATA gSyncData;
+static int sync_data(int hr, int spo2, int rr, int nibp_sys, int nibp_dia, int nibp_mean);
+
+enum FRAMEBUFFER_MODE
+{
+	FB_NULL_MODE,
+	FB_APP_MODE,
+	FB_DEV_MODE
+};
 static const char* s_tip_welcome =
 "-------------------------------------------------------------------\n"
 "*  GuiLite Sample code [Version 1.6]                              *\n"
 "*  Any feedback will be appreciated. Email: idea4good@outlook.com *\n"
 "-------------------------------------------------------------------\n"
-"How to run on PC/Desktop?\n"
+"How to run with Internet browser?\n"
 "1. Run Display.html with your internet browser:\n"
 "2. Type command: sslp\n\n"
 
-"How to run on embedded Linux device?\n"
-"Type command: sample_native/bin/sample_native path W H M N\n"
-"  path: file path of frame buffer, for example: /dev/fb\n"
-"  W:    Width of frame buffer, for example: 1024\n"
-"  H:    Height of frame buffer, for example: 768\n"
-"  M:    0\n"
-"  N:    0~8\n\n";
+"How to run inside QT APP?\n"
+"If x64: ./display-x64 | ./sample_native shared-fb\n"
+"If ARM: ./display-arm | ./sample_native shared-fb\n\n"
+
+"How to run on Linux?\n"
+"Type command: ./sample_native /dev/fb-path\n\n";
 
 int main(int argc, char** argv)
 {
 	printf(s_tip_welcome);
 
-	remove("snapshot_0.bmp");
-	remove("snapshot_1.bmp");
-	remove("snapshot_2.bmp");
-	remove("snapshot_3.bmp");
-	remove("snapshot_4.bmp");
-	remove("snapshot_5.bmp");
-	remove("snapshot_6.bmp");
-	remove("snapshot_7.bmp");
-	remove("snapshot_8.bmp");
-
-	init_dump();
-
 	int main_cnt = 1;
 	int sub_cnt = 0;
-	bool is_shared_fb = false;
+	int color_bytes = 2;
+	int main_screen_width = 1024;
+	int main_screen_height = 768;
+	int sub_screen_width = 1024;
+	int sub_screen_height = 370;
+    gSyncData = sync_data;
+    sync_data(60, 98, 30, 120, 80, 100);//ping cloud
+
+	FRAMEBUFFER_MODE fb_mode = FB_NULL_MODE;
+	char *fb_dev_path = NULL;
+
 	int share_id = 1;//should be same with display app.
 
 	if (argc == 3)
@@ -64,135 +80,51 @@ int main(int argc, char** argv)
 	else if(argc == 2)
 	{
 		char* argument = argv[1];
-		if(strcmp(argument,"shared-fb") != 0)
+		if(strcmp(argument,"shared-fb") == 0)
 		{
-			printf("Invalid argument, should be: shared-fb\n");
+			fb_mode = FB_APP_MODE;
+			
+		}
+		else if(strncmp(argument, "/dev/", 5) == 0)
+		{
+			fb_dev_path = argument;
+			fb_mode = FB_DEV_MODE;
+		}
+		else
+		{
+			printf("Invalid argument, should be: shared-fb, or framebuffer path\n");
 			return -1;
 		}
-		is_shared_fb = true;
+		
 	}
-
-	init_std_io((main_cnt + sub_cnt));
 
 	void** main_fbs = (void**)malloc(sizeof(void*) * main_cnt);
 	void** sub_fbs = (void**)malloc(sizeof(void*) * sub_cnt);
 	for (int i = 0; i < main_cnt; i++)
 	{
-		if(is_shared_fb)
+		switch(fb_mode)
 		{
-			main_fbs[i] = make_fb_shared_by_display_app(share_id);
+			case FB_APP_MODE:
+				main_fbs[i] = get_embeded_fb_in_display_app(share_id);
+			break;
+			case FB_DEV_MODE:
+				main_fbs[i] = get_dev_fb(fb_dev_path, main_screen_width, main_screen_height, color_bytes);
+			break;
+			default:
+				main_fbs[i] = calloc(main_screen_width * main_screen_height, color_bytes);
+			break;
 		}
-		else
-		{
-			main_fbs[i] = calloc(1024 * 768 * 2, 1);
-		}	
 	}
 	for (int i = 0; i < sub_cnt; i++)
 	{
-		sub_fbs[i] = calloc(1024 * 370 * 2, 1);
-	}
-	return run(main_fbs, main_cnt, sub_fbs, sub_cnt);	//never return;
-}
-
-#ifdef __linux__
-#include <sys/shm.h>
-#include <unistd.h>
-#include <signal.h>
-#include <execinfo.h>
-#include <assert.h>
-#include <errno.h>
-
-#define DUMP_BUF_SIZE 1024
-#define DUMP_FILE_PATH "dump.txt"
-
-static void *s_dump_buffer[DUMP_BUF_SIZE];
-static const char *s_seg_start = ".....segment fault.....\n";
-static const char *s_assert_start = ".....assert.....\n";
-static const char *s_end = ".....end.....\n";
-
-void do_assert(const char* file, int line)
-{
-	printf("assert! file:%s,line:%d,error no: %d\n", file, line, errno);
-
-	int num;
-	char **calls;
-	num = backtrace(s_dump_buffer, DUMP_BUF_SIZE);
-	calls = backtrace_symbols(s_dump_buffer, num);
-	for (int i = 0; i < num; i++)
-	{
-		printf("%s\n", calls[i]);
+		sub_fbs[i] = calloc(sub_screen_width * sub_screen_height, color_bytes);
 	}
 
-	char string[256];
-	memset(string, 0, sizeof(string));
-
-	FILE *fp = fopen(DUMP_FILE_PATH, "ab+");
-	fwrite(s_assert_start, sizeof(unsigned char), strlen(s_assert_start), fp);
-
-	sprintf(string, "file:%s,line:%d,error no: %d\n", file, line, errno);
-	fwrite(string, sizeof(unsigned char), strlen(string), fp);
-
-	for (int i = 0; i < num; i++)
-	{
-		fwrite(calls[i], sizeof(unsigned char), strlen(calls[i]), fp);
-		fwrite("\n", sizeof(unsigned char), 1, fp);
-	}
-	fwrite(s_end, sizeof(unsigned char), strlen(s_end), fp);
-	assert(0);
-	_exit(-1);
+	init_std_io((main_cnt + sub_cnt));
+	return startHostMonitor(main_fbs, main_cnt, main_screen_width, main_screen_height, sub_fbs, sub_cnt, sub_screen_width, sub_screen_height, color_bytes);	//never return;
 }
 
-void log_out(const char* log)
-{
-	printf(log);
-	fflush(stdout);
-}
-
-static void write_dump_file(char **calls, int num)
-{
-	FILE *fp;
-	fp = fopen(DUMP_FILE_PATH, "ab+");
-
-	fwrite(s_seg_start, sizeof(unsigned char), strlen(s_seg_start), fp);
-	if (fp != NULL)
-	{
-		for (int i = 0; i < num; i++)
-		{
-			fwrite(calls[i], sizeof(unsigned char), strlen(calls[i]), fp);
-			fwrite("\n", sizeof(unsigned char), 1, fp);
-		}
-		fwrite(s_end, sizeof(unsigned char), strlen(s_end), fp);
-		fclose(fp);
-	}
-}
-
-static void dump_segment_fault(int n, siginfo_t *siginfo, void *myact)
-{
-	printf("segment fault! addr:0x%X\n", siginfo->si_addr);
-
-	int num;
-	char **calls;
-	num = backtrace(s_dump_buffer, DUMP_BUF_SIZE);
-	calls = backtrace_symbols(s_dump_buffer, num);
-	for (int i = 0; i < num; i++)
-	{
-		printf("%s\n", calls[i]);
-	}
-	write_dump_file(calls, num);
-	_exit(-1);
-}
-
-static void init_dump()
-{
-	struct sigaction act;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = SA_SIGINFO;
-	act.sa_sigaction = dump_segment_fault;
-	sigaction(SIGSEGV, &act, NULL);
-	signal(SIGCLD, SIG_IGN);
-}
-
-static void* make_fb_shared_by_display_app(int shared_id)
+static void* get_embeded_fb_in_display_app(int shared_id)
 {
 	void* ret = NULL;
 	while(ret == NULL)
@@ -214,32 +146,50 @@ static void* make_fb_shared_by_display_app(int shared_id)
 	}
 	return ret;
 }
-#else
 
-#include <windows.h>
-#include <assert.h>
-
-void do_assert(const char* file, int line)
+static void* get_dev_fb(char* path, int &width, int &height, int &color_bytes)
 {
-	printf("assert! file:%s,line:%d\n", file, line);
-	assert(false);
+	int fd = open (path, O_RDWR);
+	if(0 > fd)
+	{
+		printf("%s, open fb failed!\n", path);
+		_exit(-1);
+	}
+
+	struct fb_var_screeninfo vinfo;
+	if (0 > ioctl(fd, FBIOGET_VSCREENINFO, &vinfo))
+	{
+		printf("get fb info failed!\n");
+		_exit(-1);
+    }
+
+    width = vinfo.xres;
+    height = vinfo.yres;
+    color_bytes = vinfo.bits_per_pixel / 8;
+    if (width & 0x3)
+    {
+        printf("Warning: vinfo.xres should be divided by 4!\nChange your display resolution to meet the rule.\n");
+    }
+    printf("vinfo.xres=%d\n",vinfo.xres);
+    printf("vinfo.yres=%d\n",vinfo.yres);
+    printf("vinfo.bits_per_pixel=%d\n",vinfo.bits_per_pixel);
+
+	void* fbp = mmap(0, (vinfo.xres * vinfo.yres * color_bytes), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if(0 > fbp)
+	{
+		printf("mmap fb failed!\n");  
+		_exit(-1);
+	}
+	memset(fbp, 0, (vinfo.xres * vinfo.yres * color_bytes));
+	return fbp;
 }
 
-void log_out(const char* log)
+int sync_data(int hr, int spo2, int rr, int nibp_sys, int nibp_dia, int nibp_mean)
 {
-	printf(log);
-	fflush(stdout);
-	OutputDebugStringA(log);
+    char cmd_line[128];
+    memset(cmd_line, 0, sizeof(cmd_line));
+    sprintf(cmd_line, "%s %d %d %d %d %d %d",
+            "./.sync_data.sh ",
+            hr, spo2, rr, nibp_sys, nibp_dia, nibp_mean);
+    return system(cmd_line);
 }
-
-static void* make_fb_shared_by_display_app(int shared_id)
-{
-	printf("shared frame buffer support Linux only!\n");
-	exit(-4);
-	return NULL;
-}
-
-static void init_dump()
-{
-}
-#endif

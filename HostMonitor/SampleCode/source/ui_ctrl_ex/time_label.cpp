@@ -3,18 +3,18 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../gui_include/label.h"
-#include "../core_include/resource_type.h"
+#include "../core_include/resource.h"
 #include "../core_include/word.h"
 #include "../core_include/surface.h"
-#include "../gui_include/font.h"
+#include "../gui_include/my_resource.h"
 #include <string.h>
 #include <stdio.h>
 #include "time_label.h"
 
 void c_time_label::on_init_children(void)
 {
-	m_font_type = FONT_ENG_SMB_AA();
-	set_font_color(GLT_RGB(255,255,255));
+	m_font_type = c_my_resource::get_font(FONT_ENG_SMB);
+	set_font_color(GL_RGB(255,255,255));
 	memset(&m_time, 0, sizeof(m_time));
 }
 

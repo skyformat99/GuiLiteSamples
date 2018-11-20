@@ -1,4 +1,4 @@
-#include "../core_include/api.h"
+﻿#include "../core_include/api.h"
 #include "../core_include/rect.h"
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
@@ -9,7 +9,6 @@
 #include "../gui_include/edit.h"
 #include "../include/ctrl_id.h"
 #include "../include/define.h"
-#include "../source/resource/font/strings.h"
 #include "patient_setup_dlg_xml.h"
 
 #define DLG_YMD_EDIT_WIDTH			( ( DLG_CTRL_WIDTH + 80 ) / 3 )
@@ -46,16 +45,16 @@ static c_list_box s_lb_blood_type;
 
 WND_TREE g_patient_setup_children[]=
 {
-	{&s_label_first_name,	1,	STR_SETUP_DLG_SURNAME,  DLG_LEFT_CTRL_X, DLG_CTRL_Y(0), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_second_name,	2, 	STR_SETUP_DLG_NAME,		DLG_LEFT_CTRL_X, DLG_CTRL_Y(1), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_case,			3,  STR_SETUP_DLG_CASE,     DLG_LEFT_CTRL_X, DLG_CTRL_Y(2), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_sex,			4,  STR_SEX,                DLG_LEFT_CTRL_X, DLG_CTRL_Y(3), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_sick_type,	5,  STR_PATIENT_TYPE,       DLG_LEFT_CTRL_X, DLG_CTRL_Y(4), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_height,		6,  STR_STATURE,            DLG_LEFT_CTRL_X, DLG_CTRL_Y(5), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_weight,		7,  STR_AVOIRDUPOIS,        DLG_LEFT_CTRL_X, DLG_CTRL_Y(6), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_blood_type,	8,  STR_SETUP_DLG_BLOOD,    DLG_LEFT_CTRL_X, DLG_CTRL_Y(7), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
-	{&s_label_admission_date,9,  STR_SETUP_DLG_ADMIT_DATE,DLG_LEFT_CTRL_X,DLG_CTRL_Y(8),DLG_CTRL_WIDTH - 80,DLG_CTRL_HEIGHT},
-	{&s_label_birthday,		10, STR_BIRTHDAY,           DLG_LEFT_CTRL_X, DLG_CTRL_Y(9), DLG_CTRL_WIDTH - 80,DLG_CTRL_HEIGHT},
+	{&s_label_first_name,	1,	"SurName/姓",		DLG_LEFT_CTRL_X, DLG_CTRL_Y(0), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_second_name,	2, 	"Name/名稱",			DLG_LEFT_CTRL_X, DLG_CTRL_Y(1), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_case,			3,  "Case/番号",			DLG_LEFT_CTRL_X, DLG_CTRL_Y(2), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_sex,			4,  "Gender/성",       DLG_LEFT_CTRL_X, DLG_CTRL_Y(3), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_sick_type,	5,  "Patient Cat./Төрөл", DLG_LEFT_CTRL_X, DLG_CTRL_Y(4), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_height,		6,  "Height/ความสูง",       DLG_LEFT_CTRL_X, DLG_CTRL_Y(5), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_weight,		7,  "Weight/Βάρος",		DLG_LEFT_CTRL_X, DLG_CTRL_Y(6), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_blood_type,	8,  "Blood Type/Тип крови",   DLG_LEFT_CTRL_X, DLG_CTRL_Y(7), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
+	{&s_label_admission_date,9, "Admit date/प्रवेश की तारीख",	DLG_LEFT_CTRL_X,DLG_CTRL_Y(8),DLG_CTRL_WIDTH - 80,DLG_CTRL_HEIGHT},
+	{&s_label_birthday,		10, "Birthday/lā hānau",     DLG_LEFT_CTRL_X, DLG_CTRL_Y(9), DLG_CTRL_WIDTH - 80,DLG_CTRL_HEIGHT},
 	
 	{&s_edit_surname,	ID_SETUP_DLG_EDIT_FIRST_NAME,	NULL, DLG_RIGHT_CTRL_X, DLG_CTRL_Y(0), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},
 	{&s_edit_name,		ID_SETUP_DLG_EDIT_SECOND_NAME,	NULL, DLG_RIGHT_CTRL_X, DLG_CTRL_Y(1), DLG_CTRL_WIDTH, DLG_CTRL_HEIGHT},

@@ -15,33 +15,23 @@ typedef enum
 	Z_ORDER_LEVEL_MAX
 }Z_ORDER_LEVEL;
 
-#define INVALID_RGN 0xFFFFFF
-#define COLOR_USERDEF GLT_RGB(41,49,49)
-#define DUMMY_COLOR	GLT_RGB(0,0,0)
-
-typedef struct struct_custom_shape
-{
-	int l;			 
-	int t;			 
-	int r;			 
-	int b;
-	unsigned int color;
-}CUSTOM_SHAPE;
+typedef struct struct_color_rect COLOR_RECT;
 
 class c_display;
 class c_surface {
 	friend class c_display;
 public:
-	c_surface(c_display* display, void* phy_fb, unsigned int width, unsigned int height);
+	virtual void draw_pixel(int x, int y, unsigned int rgb, unsigned int z_order);
+	virtual void fill_rect(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order);
+	void fill_rect_ex(int l, int t, int r, int b, unsigned int color, const COLOR_RECT* extend_rects, int z_order);
+	virtual unsigned int get_pixel(int x, int y, unsigned int z_order);
 
-	void set_pixel(int x, int y, unsigned int rgb, unsigned int z_order);
-	unsigned int get_pixel(int x, int y, unsigned int z_order);
+	int get_width() { return m_width; }
+	int get_height() { return m_height; }
 	void draw_hline(int x0, int x1, int y, unsigned int rgb, unsigned int z_order);
 	void draw_vline(int x, int y0, int y1, unsigned int rgb, unsigned int z_order);
 	void draw_line(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order);
 	void draw_rect(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order);
-	void fill_rect(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order);
-	void draw_custom_shape(int l, int t, int r, int b, unsigned int color, const CUSTOM_SHAPE pRgn[], int z_order);
 	int flush_scrren(int left, int top, int right, int bottom);
 
 	bool is_valid(c_rect rect);
@@ -50,14 +40,16 @@ public:
 
 	int set_frame_layer(c_rect& rect, unsigned int z_order);
 	void set_active(bool flag){m_is_active = flag;}
-private:
+protected:
+	virtual void fill_rect_on_fb(int x0, int y0, int x1, int y1, unsigned int rgb);
+	virtual void set_pixel(int x, int y, unsigned int rgb);
+
 	void set_surface(void* wnd_root, Z_ORDER_LEVEL max_z_order);
 	int copy_layer_pixel_2_fb(int x, int y, unsigned int z_order);
-	void do_quick_set_pixel(int x,int y,unsigned int rgb);
-	void do_quick_fill_rect(int x0, int y0, int x1, int y1, unsigned int rgb);
-
-	unsigned int			m_width;	//in pixels
-	unsigned int			m_height;	//in pixels
+	c_surface(c_display* display, void* phy_fb, unsigned int width, unsigned int height, unsigned int color_bytes);
+	int						m_width;		//in pixels
+	int						m_height;		//in pixels
+	int						m_color_bytes;	//16 bits, 32 bits only
 	void* 					m_fb;
 	struct FRAME_LAYER 		m_frame_layers[Z_ORDER_LEVEL_MAX];
 	void*					m_usr;
@@ -68,4 +60,15 @@ private:
 	c_display*				m_display;
 };
 
+class c_surface_16bits : public c_surface {
+	friend class c_display;
+	c_surface_16bits(c_display* display, void* phy_fb, unsigned int width, unsigned int height, unsigned int color_bytes) :
+					c_surface(display, phy_fb, width, height, color_bytes) {};
+	virtual void draw_pixel(int x, int y, unsigned int rgb, unsigned int z_order);
+	virtual void fill_rect(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order);
+	virtual void fill_rect_on_fb(int x0, int y0, int x1, int y1, unsigned int rgb);
+	virtual unsigned int get_pixel(int x, int y, unsigned int z_order);
+protected:
+	virtual void set_pixel(int x, int y, unsigned int rgb);
+};
 #endif

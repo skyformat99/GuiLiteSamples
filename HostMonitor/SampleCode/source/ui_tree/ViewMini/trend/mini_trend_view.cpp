@@ -3,20 +3,19 @@
 #include "../core_include/cmd_target.h"
 #include "../core_include/wnd.h"
 #include "../gui_include/table.h"
-#include "../gui_include/font.h"
+#include "../gui_include/my_resource.h"
 #include "../include/ctrl_id.h"
 #include "../include/msg_id.h"
 #include "../source/data/database.h"
-#include "../source/resource/font/strings.h"
 #include "../source/ui_ctrl_ex/trend_graph.h"
 #include "../source/ui_ctrl_ex/trend_table.h"
 #include "../source/ui_ctrl_ex/time_bar.h"
 #include <stdio.h>
 #include "mini_trend_view.h"
 
-#define HR_COLOR				GLT_RGB(148,251,78)
-#define SPO2_COLOR				GLT_RGB(90,166,247)
-#define RR_COLOR				GLT_RGB(255,255,82)
+#define HR_COLOR				GL_RGB(148,251,78)
+#define SPO2_COLOR				GL_RGB(90,166,247)
+#define RR_COLOR				GL_RGB(255,255,82)
 
 #define H_AXIS_MARK_CNT			7
 #define H_AXIS_MARK_INTERVAL	(60 * 10)	//10 minutes between 2 marks
@@ -50,7 +49,7 @@ void c_trend_view_mini::on_update_trend_view(unsigned int wParam, unsigned int l
 	{
 		x_axis_marks[(H_AXIS_MARK_CNT - 1) - i] = (time - (i * H_AXIS_MARK_INTERVAL));
 	}
-	p_vitals_trend_graph->set_h_axis_atrrs(FONT_ENG_SB(), x_axis_marks, H_AXIS_MARK_CNT);
+	p_vitals_trend_graph->set_h_axis_atrrs(c_my_resource::get_font(FONT_ENG_SB), x_axis_marks, H_AXIS_MARK_CNT);
 	p_vitals_trend_graph->draw_h_axis();
 
 	//update data
