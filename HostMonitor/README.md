@@ -1,7 +1,7 @@
 ## How to build for WinForms - C#?
 ### core.lib gui.lib should be in BuildWinforms\HostMonitorDll, rebuild them if meet link error.
 - Open "HostMonitor\BuildWinforms\BuildWinforms.sln" by Visual studio 2017
-- Build `sample`, `HostMonitor`, `BuildWinforms` in turn, then run.
+- Build `sample`, `HostMonitor`, `BuildWinforms` in turn, then run BuildWinforms.
 
 ## How to build for Win MFC?
 ### core.lib gui.lib should be in BuildMFC\BuildMFC\libs\x86(x64), rebuild them if meet link error.
@@ -14,21 +14,21 @@
 - Click `F5` to build/run `WinCmd`, you will see UI in internet browser.
 
 ## How to build for ARM Linux device?
-### libcore.a libgui.a should be in BuildLinux\libs\arm, rebuild them if meet link error(-fPIC).
+### libcore.a libgui.a should be in BuildLinux\libs\arm, ⚠️rebuild them if meet Linking error, e.g: -fPIC, libxxx not found.
 ### Install cross compiler:
-For example: arm-linux-gnueabi-gcc
-
-`sudo apt-get install gcc-arm-linux-gnueabi g++-arm-linux-gnueabi`
-
+- For ARM32: `sudo apt-get install g++-arm-linux-gnueabi gcc-arm-linux-gnueabi`
+- For ARM64: `sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu`
+### Build
 - `cd HostMonitor`
-- `cmake -D CMAKE_C_COMPILER="/usr/bin/arm-linux-gnueabi-gcc" -D CMAKE_CXX_COMPILER="/usr/bin/arm-linux-gnueabi-g++" -D TARGET_ARCH="ARM" .`
+- For ARM32: `cmake -D CMAKE_C_COMPILER="/usr/bin/arm-linux-gnueabi-gcc" -D CMAKE_CXX_COMPILER="/usr/bin/arm-linux-gnueabi-g++" -D TARGET_ARCH="ARM" .`
+- For ARM64: `cmake -D CMAKE_C_COMPILER="/usr/bin/aarch64-linux-gnu-gcc" -D CMAKE_CXX_COMPILER="/usr/bin/aarch64-linux-gnu-g++" -D TARGET_ARCH="ARM" .`
 - `make`
 - `cd BuildLinux`
 - `chmod 777 *`
-- `./sample_native /dev/fb0`   /dev/fb0: The path of framebuffer device file.
+- `sudo ./sample_native /dev/fb0`   /dev/fb0: The path of framebuffer device file.
 
 ## How to build for x64 Linux or Rasperry Pi?
-### libcore.a libgui.a should be in BuildLinux\libs, rebuild them if meet link error(-fPIC).
+### libcore.a libgui.a should be in BuildLinux\libs, ⚠️rebuild them if meet Linking error, e.g: -fPIC, libxxx not found.
 1. Build target:
 - `cd HostMonitor`
 - `cmake .`
@@ -37,12 +37,12 @@ For example: arm-linux-gnueabi-gcc
 - `chmod 777 *`
 
 2. Run on Ubuntu:
-- `./sample_native /dev/fb0`   /dev/fb0: The path of framebuffer device file.
+- `sudo ./sample_native /dev/fb0`   /dev/fb0: The path of framebuffer device file.
 - If meet **permission** issue, you should enter pure command mode(not desktop mode), and run it again.
 
 3. Run inside QT APP(display-xxx is a QT APP for display, skip this if you haven't installed QT):
-- If x64:`./display-x64 | ./sample_native shared-fb`
-- If raspberry pi:`./display-arm | ./sample_native shared-fb`
+- If x64:`sudo ./display-x64 | ./sample_native shared-fb`
+- If raspberry pi:`sudo ./display-arm | ./sample_native shared-fb`
 - The source code of display-xxx here: HostMonitor/BuildLinux/display.src
 
 4. Run with internet browser:
